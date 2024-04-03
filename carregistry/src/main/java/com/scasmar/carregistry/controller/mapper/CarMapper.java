@@ -13,6 +13,7 @@ public class CarMapper {
 
     public Car toModel(CarRequest model){
         Car car = new Car();
+        car.setId(model.getId());
         car.setBrand(brandMapper.toModel(model.getBrandRequest()));
         car.setModel(model.getModel());
         car.setMillage(model.getMillage());
@@ -28,7 +29,7 @@ public class CarMapper {
 
     public CarResponse toResponse(Car entity){
         CarResponse carResponse = new CarResponse();
-        carResponse.setId(carResponse.getId());
+        carResponse.setId(entity.getId());
         carResponse.setBrandResponse(brandMapper.toResponse(entity.getBrand()));
         carResponse.setModel(entity.getModel());
         carResponse.setMillage(entity.getMillage());

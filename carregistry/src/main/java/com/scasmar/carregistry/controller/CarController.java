@@ -4,6 +4,7 @@ import com.scasmar.carregistry.controller.dto.CarRequest;
 import com.scasmar.carregistry.controller.dto.CarResponse;
 import com.scasmar.carregistry.controller.mapper.CarMapper;
 import com.scasmar.carregistry.model.Car;
+import com.scasmar.carregistry.service.BrandService;
 import com.scasmar.carregistry.service.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,7 @@ public class CarController {
 
     @PostMapping("/addCar")
     public ResponseEntity<?> addCar(@RequestBody CarRequest carRequest){
+
         CarResponse carResponse = carMapper.toResponse(carService.addCar(carMapper.toModel(carRequest)));
         return ResponseEntity.ok().body(carResponse);
     }

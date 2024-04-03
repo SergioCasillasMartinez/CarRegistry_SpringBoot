@@ -22,10 +22,10 @@ public class CarServiceImpl implements CarService {
     private CarRepository carRepository;
     @Autowired
     private CarConverter carConverter;
-    /*@Autowired
+    @Autowired
     private BrandRepository brandRepository;
     @Autowired
-    private BrandConverter brandConverter;*/
+    private BrandConverter brandConverter;
 
     @Override
     public List<Car> getAllCars(){
@@ -44,18 +44,15 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public Car addCar(Car car) {
-        /*Optional<BrandEntity> brandEntityList = brandRepository.findById(car.getId());
+    public Car addCar(Car car) { // If the brand does not exist the car does not add
+        Optional<BrandEntity> brandEntityList = brandRepository.findById(car.getBrand().getId());
         if (brandEntityList.isPresent()){
-            Brand brand = brandConverter.toBrand(brandEntityList.get());
-            car.setBrand(brand);
             CarEntity carEntity = carRepository.save(carConverter.toEntity(car));
+            carEntity.setBrandEntity(brandEntityList.get());
             return carConverter.toCar(carRepository.save(carEntity));
         } else {
             return null;
-        }*/
-        CarEntity carEntity = carRepository.save(carConverter.toEntity(car));
-        return carConverter.toCar(carEntity);
+        }
     }
 
     @Override

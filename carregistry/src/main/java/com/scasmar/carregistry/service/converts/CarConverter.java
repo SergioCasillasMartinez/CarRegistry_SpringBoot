@@ -12,6 +12,7 @@ public class CarConverter {
 
     public Car toCar(CarEntity entity){
         Car car = new Car();
+        car.setId(entity.getId());
         car.setBrand(brandConverter.toBrand(entity.getBrandEntity()));
         car.setModel(entity.getModel());
         car.setMillage(entity.getMillage());
@@ -27,7 +28,7 @@ public class CarConverter {
 
     public CarEntity toEntity(Car entity){
         CarEntity carEntity = new CarEntity();
-        carEntity.setId(carEntity.getId());
+        carEntity.setId(entity.getId());
         carEntity.setBrandEntity(brandConverter.toEntity(entity.getBrand()));
         carEntity.setModel(entity.getModel());
         carEntity.setMillage(entity.getMillage());
