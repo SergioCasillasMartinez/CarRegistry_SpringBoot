@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 public class BrandConverter {
     public Brand toBrand(BrandEntity entity){
         Brand brand = new Brand();
-        brand.setId(entity.getId());
         brand.setName(entity.getName());
         brand.setWarranty(entity.getWarranty());
         brand.setCountry(entity.getCountry());

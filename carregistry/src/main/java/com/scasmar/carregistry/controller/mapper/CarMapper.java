@@ -3,15 +3,16 @@ package com.scasmar.carregistry.controller.mapper;
 import com.scasmar.carregistry.controller.dto.CarRequest;
 import com.scasmar.carregistry.controller.dto.CarResponse;
 import com.scasmar.carregistry.model.Car;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class CarMapper {
+    @Autowired
     private BrandMapper brandMapper;
 
     public Car toModel(CarRequest model){
         Car car = new Car();
-        car.setId(model.getId());
         car.setBrand(brandMapper.toModel(model.getBrandRequest()));
         car.setModel(model.getModel());
         car.setMillage(model.getMillage());

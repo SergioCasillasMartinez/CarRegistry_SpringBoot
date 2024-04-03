@@ -13,7 +13,6 @@ public class CarConverter {
     public Car toCar(CarEntity entity){
         Car car = new Car();
         car.setBrand(brandConverter.toBrand(entity.getBrandEntity()));
-        car.setId(entity.getId());
         car.setModel(entity.getModel());
         car.setMillage(entity.getMillage());
         car.setPrice(entity.getPrice());
