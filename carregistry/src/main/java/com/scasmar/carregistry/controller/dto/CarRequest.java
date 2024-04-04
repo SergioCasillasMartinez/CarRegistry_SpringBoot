@@ -4,8 +4,7 @@ import lombok.Data;
 
 @Data
 public class CarRequest {
-    private Integer id;
-    private BrandRequest brandRequest;
+    private String brandName;
     private String model;
     private Integer millage;
     private Double price;

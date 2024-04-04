@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 public class BrandMapper {
     public Brand toModel(BrandRequest model){
         Brand brand = new Brand();
-        brand.setId(model.getId());
         brand.setName(model.getName());
         brand.setWarranty(model.getWarranty());
         brand.setCountry(model.getCountry());

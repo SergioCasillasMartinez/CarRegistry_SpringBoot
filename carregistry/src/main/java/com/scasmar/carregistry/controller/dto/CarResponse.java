@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class CarResponse {
     private Integer id;
-    private BrandResponse brandResponse;
+    private BrandResponse brand;
     private String model;
     private Integer millage;
     private Double price;

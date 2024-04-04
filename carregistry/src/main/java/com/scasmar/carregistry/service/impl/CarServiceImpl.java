@@ -45,10 +45,10 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public Car addCar(Car car) { // If the brand does not exist the car does not add
-        Optional<BrandEntity> brandEntityList = brandRepository.findById(car.getBrand().getId());
-        if (brandEntityList.isPresent()){
-            CarEntity carEntity = carRepository.save(carConverter.toEntity(car));
-            carEntity.setBrandEntity(brandEntityList.get());
+        Optional<BrandEntity> brandEntity = brandRepository.findByName(car.getBrand().getName());
+        if (brandEntity.isPresent()){
+            CarEntity carEntity = carConverter.toEntity(car);
+            carEntity.setBrandEntity(brandEntity.get());
             return carConverter.toCar(carRepository.save(carEntity));
         } else {
             return null;
