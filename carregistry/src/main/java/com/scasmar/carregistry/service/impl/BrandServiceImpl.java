@@ -22,9 +22,8 @@ public class BrandServiceImpl implements BrandService {
     @Override
     public List<Brand> getAllBrands() {
         List<BrandEntity> brandEntityList = brandRepository.findAll();
-        List<Brand> brandList = new ArrayList<>();
-        brandEntityList.forEach(brandEntity -> brandList.add(brandConverter.toBrand(brandEntity)));
-        return brandList;
+
+        return brandEntityList.stream().map(brandConverter::toBrand).toList();
     }
 
     @Override
@@ -40,9 +39,8 @@ public class BrandServiceImpl implements BrandService {
     @Override
     public List<Brand> getBrandByCountry(String country) {
         List<BrandEntity> brandEntityList = brandRepository.findByCountry(country);
-        List<Brand> brandList = new ArrayList<>();
-        brandEntityList.forEach(brandEntity -> brandList.add(brandConverter.toBrand(brandEntity)));
-        return brandList;
+
+        return brandEntityList.stream().map(brandConverter::toBrand).toList();
     }
 
     @Override

@@ -10,11 +10,13 @@ import com.scasmar.carregistry.service.CarService;
 import com.scasmar.carregistry.service.converts.BrandConverter;
 import com.scasmar.carregistry.service.converts.CarConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class CarServiceImpl implements CarService {
@@ -28,19 +30,19 @@ public class CarServiceImpl implements CarService {
     private BrandConverter brandConverter;
 
     @Override
-    public List<Car> getAllCars(){
+    @Async
+    public CompletableFuture<List<Car>> getAllCars(){
         List<CarEntity> carEntityList = carRepository.findAll();
-        List<Car> carList = new ArrayList<>();
-        carEntityList.forEach(carEntity -> carList.add(carConverter.toCar(carEntity)));
-        return carList;
+        List<Car> carList = carEntityList.stream().map(carConverter::toCar).toList();
+
+        return CompletableFuture.completedFuture(carList);
     }
 
     @Override
     public List<Car> getCarModel(String model) {
         List<CarEntity> carEntityList = carRepository.findByModel(model);
-        List<Car> carList = new ArrayList<>();
-        carEntityList.forEach(carEntity -> carList.add(carConverter.toCar(carEntity)));
-        return carList;
+
+        return carEntityList.stream().map(carConverter::toCar).toList();
     }
 
     @Override
@@ -49,10 +51,21 @@ public class CarServiceImpl implements CarService {
         if (brandEntity.isPresent()){
             CarEntity carEntity = carConverter.toEntity(car);
             carEntity.setBrandEntity(brandEntity.get());
+
             return carConverter.toCar(carRepository.save(carEntity));
         } else {
             return null;
         }
+    }
+
+    @Override
+    @Async
+    public CompletableFuture<List<Car>> addCarList(List<Car> carList){
+        List<CarEntity> carEntityList = carList.stream().map(carConverter::toEntity).toList();
+        List<CarEntity> savedCarEntityList = carRepository.saveAll(carEntityList);
+        List<Car> savedCarList = savedCarEntityList.stream().map(carConverter::toCar).toList();
+
+        return CompletableFuture.completedFuture(savedCarList);
     }
 
     @Override
@@ -61,6 +74,7 @@ public class CarServiceImpl implements CarService {
         if(carEntityOptional.isPresent()){
             CarEntity carEntity = carConverter.toEntity(car);
             carEntity.setId(id);
+
             return carConverter.toCar(carRepository.save(carEntity));
         }else {
             return null;
