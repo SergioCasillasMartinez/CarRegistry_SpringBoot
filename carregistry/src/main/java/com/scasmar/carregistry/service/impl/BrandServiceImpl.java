@@ -6,11 +6,13 @@ import com.scasmar.carregistry.respository.BrandRepository;
 import com.scasmar.carregistry.service.BrandService;
 import com.scasmar.carregistry.service.converts.BrandConverter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class BrandServiceImpl implements BrandService {
@@ -20,10 +22,12 @@ public class BrandServiceImpl implements BrandService {
     private BrandConverter brandConverter;
 
     @Override
-    public List<Brand> getAllBrands() {
+    @Async
+    public CompletableFuture<List<Brand>> getAllBrands() {
         List<BrandEntity> brandEntityList = brandRepository.findAll();
+        List<Brand> brandList = brandEntityList.stream().map(brandConverter::toBrand).toList();
 
-        return brandEntityList.stream().map(brandConverter::toBrand).toList();
+        return CompletableFuture.completedFuture(brandList);
     }
 
     @Override
@@ -48,6 +52,17 @@ public class BrandServiceImpl implements BrandService {
         BrandEntity brandEntity = brandRepository.save(brandConverter.toEntity(brand));
         return brandConverter.toBrand(brandEntity);
     }
+
+    @Override
+    @Async
+    public CompletableFuture<List<Brand>> addBrandList(List<Brand> brandList) {
+        List<BrandEntity> brandEntityList = brandList.stream().map(brandConverter::toEntity).toList();
+        List<BrandEntity> savedBrandEntityList = brandRepository.saveAll(brandEntityList);
+        List<Brand> savedBrandList = savedBrandEntityList.stream().map(brandConverter::toBrand).toList();
+
+        return CompletableFuture.completedFuture(savedBrandList);
+    }
+
 
     @Override
     public Brand updateBrand(int id, Brand brand) {

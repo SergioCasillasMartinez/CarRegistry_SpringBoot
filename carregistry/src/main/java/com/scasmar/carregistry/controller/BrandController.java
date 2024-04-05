@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Controller
 public class BrandController {
@@ -21,11 +22,14 @@ public class BrandController {
     private BrandMapper brandMapper;
     
     @GetMapping("/allBrands")
-    public ResponseEntity<?> getAllBrands(){
-        List<Brand> brandList = brandService.getAllBrands();
-        List<BrandResponse> brandResponseList = new ArrayList<>();
-        brandList.forEach(brand -> brandResponseList.add(brandMapper.toResponse(brand)));
-        return ResponseEntity.ok().body(brandResponseList);
+    public CompletableFuture<?> getAllBrands(){
+        try{
+            CompletableFuture<List<Brand>> brandList = brandService.getAllBrands();
+            List<BrandResponse> brandResponseList = brandList.get().stream().map(brandMapper::toResponse).toList();
+            return CompletableFuture.completedFuture(ResponseEntity.ok().body(brandResponseList));
+        } catch (Exception e){
+            return CompletableFuture.completedFuture(ResponseEntity.notFound().build());
+        }
     }
 
     @GetMapping("/brandId/{id}")
@@ -46,6 +50,17 @@ public class BrandController {
     public ResponseEntity<?> addBrand(@RequestBody BrandRequest brandRequest){
         BrandResponse brandResponse = brandMapper.toResponse(brandService.addBrand(brandMapper.toModel(brandRequest)));
         return ResponseEntity.ok().body(brandResponse);
+    }
+
+    @PostMapping("/addBrands")
+    public CompletableFuture<?> addBrandList(@RequestBody List<BrandRequest> brandRequestList){
+        try {
+            List<Brand> brandList = brandRequestList.stream().map(brandMapper::toModel).toList();
+
+            return CompletableFuture.completedFuture(ResponseEntity.ok().body(brandList));
+        } catch (Exception e){
+            return CompletableFuture.completedFuture(ResponseEntity.internalServerError().build());
+        }
     }
 
     @PutMapping("/updateBrand/{id}")

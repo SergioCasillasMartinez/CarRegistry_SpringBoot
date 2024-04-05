@@ -20,6 +20,6 @@ public class BrandEntity {
     private int warranty;
     private String country;
 
-    @OneToMany(mappedBy = "brandEntity")
+    @OneToMany(mappedBy = "id")
     List<CarEntity> carEntityList;
 }

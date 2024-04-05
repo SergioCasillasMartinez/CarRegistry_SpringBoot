@@ -44,6 +44,7 @@ public class CarController {
     @PostMapping("/addCar")
     public ResponseEntity<?> addCar(@RequestBody CarRequest carRequest){
         CarResponse carResponse = carMapper.toResponse(carService.addCar(carMapper.toModel(carRequest)));
+
         return ResponseEntity.ok().body(carResponse);
     }
 
