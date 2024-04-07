@@ -50,7 +50,14 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests( authorize -> authorize
                 .requestMatchers(HttpMethod.POST, "/login", "/signup").permitAll()
-                .requestMatchers(HttpMethod.GET, "/test/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/car/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/car/**").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/car/**").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/car/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/brand/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/brand/**").permitAll()
+                .requestMatchers(HttpMethod.PUT, "/brand/**").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/brand/**").permitAll()
                 .anyRequest().authenticated())
         .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

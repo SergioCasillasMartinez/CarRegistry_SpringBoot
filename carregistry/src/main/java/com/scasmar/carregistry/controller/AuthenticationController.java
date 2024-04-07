@@ -1,8 +1,8 @@
-package com.scasmar.carregistry.rest;
+package com.scasmar.carregistry.controller;
 
-import com.scasmar.carregistry.dto.LoginRequest;
-import com.scasmar.carregistry.dto.SingUpRequest;
-import com.scasmar.carregistry.service.impl.AuthenticationService;
+import com.scasmar.carregistry.controller.dto.LoginRequest;
+import com.scasmar.carregistry.controller.dto.SingUpRequest;
+import com.scasmar.carregistry.service.impl.AuthenticationServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,14 +14,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
-public class UserController {
+public class AuthenticationController {
 
-    private final AuthenticationService authenticationService;
+    private final AuthenticationServiceImpl authenticationServiceImpl;
 
     @PostMapping("/signup")
     public ResponseEntity<?> singup(@RequestBody SingUpRequest request) {
        try {
-           return ResponseEntity.ok(authenticationService.signup(request));
+           return ResponseEntity.ok(authenticationServiceImpl.signup(request));
        }
        catch (Exception e) {
            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -31,6 +31,6 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authenticationService.login(request));
+        return ResponseEntity.ok(authenticationServiceImpl.login(request));
     }
 }

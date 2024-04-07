@@ -7,20 +7,23 @@ import com.scasmar.carregistry.model.Car;
 import com.scasmar.carregistry.service.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-@Controller
+@RestController
+@RequestMapping("/car")
 public class CarController {
     @Autowired
     private CarService carService;
     @Autowired
     private CarMapper carMapper;
 
-    @GetMapping("/allCars")
+    @GetMapping("/findAll")
+    @PreAuthorize("hasAnyRole('CLIENT','VENDOR')")
     public CompletableFuture<?> getAllCars(){
         try{
             CompletableFuture<List<Car>> carsList = carService.getAllCars();
@@ -32,7 +35,8 @@ public class CarController {
         }
     }
 
-    @GetMapping("/carModel/{model}")
+    @GetMapping("/{model}")
+    @PreAuthorize("hasAnyRole('CLIENT','VENDOR')")
     public ResponseEntity<?> getCarPrice(@PathVariable String model){
         List<Car> carsList = carService.getCarModel(model);
         List<CarResponse> carResponseList = carsList.stream().map(carMapper::toResponse).toList();
@@ -40,14 +44,16 @@ public class CarController {
         return ResponseEntity.ok().body(carResponseList);
     }
 
-    @PostMapping("/addCar")
+    @PostMapping("/add")
+    @PreAuthorize("hasRole('VENDOR')")
     public ResponseEntity<?> addCar(@RequestBody CarRequest carRequest){
         CarResponse carResponse = carMapper.toResponse(carService.addCar(carMapper.toModel(carRequest)));
 
         return ResponseEntity.ok().body(carResponse);
     }
 
-    @PostMapping("/addCars")
+    @PostMapping("/addList")
+    @PreAuthorize("hasRole('VENDOR')")
     public CompletableFuture<?> addCarList(@RequestBody List<CarRequest> carRequestList){
         try{
             List<Car> carList = carRequestList.stream().map(carMapper::toModel).toList();
@@ -58,15 +64,17 @@ public class CarController {
         }
     }
 
-    @PutMapping("/updateCar/{id}")
+    @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('VENDOR')")
     public ResponseEntity<?> updateCar(@PathVariable int id, @RequestBody CarRequest carRequest){
         carService.updateCar(id, carMapper.toModel(carRequest));
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/deleteCar/{id}")
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('VENDOR')")
     public ResponseEntity<?> deleteCar(@PathVariable int id){
         carService.deleteCar(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok().body("Deleted Car with id: " + id);
     }
 }

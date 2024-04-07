@@ -1,4 +1,4 @@
-package com.scasmar.carregistry.dto;
+package com.scasmar.carregistry.controller.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponse {
-    String jwt;
+public class LoginRequest {
+    String user;
+    String password;
 }

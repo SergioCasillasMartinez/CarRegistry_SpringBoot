@@ -1,4 +1,4 @@
-package com.scasmar.carregistry.dto;
+package com.scasmar.carregistry.controller.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginRequest {
-    String user;
+public class SingUpRequest {
+    String name;
+    String surname;
+    String email;
     String password;
+
 }
