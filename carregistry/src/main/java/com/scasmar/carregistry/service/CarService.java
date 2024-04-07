@@ -1,7 +1,7 @@
 package com.scasmar.carregistry.service;
 
-import com.scasmar.carregistry.entity.CarEntity;
 import com.scasmar.carregistry.model.Car;
+
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 

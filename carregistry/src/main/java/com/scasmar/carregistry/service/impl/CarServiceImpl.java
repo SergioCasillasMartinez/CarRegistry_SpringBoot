@@ -1,7 +1,6 @@
 package com.scasmar.carregistry.service.impl;
 
 import com.scasmar.carregistry.entity.BrandEntity;
-import com.scasmar.carregistry.model.Brand;
 import com.scasmar.carregistry.model.Car;
 import com.scasmar.carregistry.entity.CarEntity;
 import com.scasmar.carregistry.respository.BrandRepository;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
