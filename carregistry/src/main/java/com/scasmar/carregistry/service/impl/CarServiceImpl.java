@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -59,7 +60,15 @@ public class CarServiceImpl implements CarService {
     @Override
     @Async
     public CompletableFuture<List<Car>> addCarList(List<Car> carList){
-        List<CarEntity> carEntityList = carList.stream().map(carConverter::toEntity).toList();
+        List<CarEntity> carEntityList = new ArrayList<>();//carList.stream().map(carConverter::toEntity).toList();
+        carList.forEach(car ->{
+            Optional<BrandEntity> brandEntity = brandRepository.findByName(car.getBrand().getName());
+            if(brandEntity.isPresent()){
+                CarEntity carEntity = carConverter.toEntity(car);
+                carEntity.setBrandEntity(brandEntity.get());
+                carEntityList.add(carEntity);
+            }
+        });
         List<CarEntity> savedCarEntityList = carRepository.saveAll(carEntityList);
         List<Car> savedCarList = savedCarEntityList.stream().map(carConverter::toCar).toList();
 
