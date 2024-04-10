@@ -68,6 +68,7 @@ public class CarController {
     @PreAuthorize("hasRole('VENDOR')")
     public ResponseEntity<?> updateCar(@PathVariable int id, @RequestBody CarRequest carRequest){
         carService.updateCar(id, carMapper.toModel(carRequest));
+
         return ResponseEntity.ok().build();
     }
 
@@ -75,6 +76,7 @@ public class CarController {
     @PreAuthorize("hasRole('VENDOR')")
     public ResponseEntity<?> deleteCar(@PathVariable int id){
         carService.deleteCar(id);
+
         return ResponseEntity.ok().body("Deleted Car with id: " + id);
     }
 }
