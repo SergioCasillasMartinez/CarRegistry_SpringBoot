@@ -4,8 +4,8 @@ import com.scasmar.carregistry.model.Brand;
 import com.scasmar.carregistry.entity.BrandEntity;
 import com.scasmar.carregistry.respository.BrandRepository;
 import com.scasmar.carregistry.service.BrandService;
-import com.scasmar.carregistry.service.converts.BrandConverter;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.scasmar.carregistry.service.converters.BrandConverter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +14,10 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@RequiredArgsConstructor
 public class BrandServiceImpl implements BrandService {
-    @Autowired
-    private BrandRepository brandRepository;
-    @Autowired
-    private BrandConverter brandConverter;
+    private final BrandRepository brandRepository;
+    private final BrandConverter brandConverter;
 
     @Override
     @Async
@@ -32,15 +31,13 @@ public class BrandServiceImpl implements BrandService {
     @Override
     public Brand getBrandById(int id){
         Optional<BrandEntity> brandEntityOptional = brandRepository.findById(id);
-        if (brandEntityOptional.isPresent()){
-            return brandConverter.toBrand(brandEntityOptional.get());
-        } else {
-            return null;
-        }
+
+        return brandEntityOptional.map(brandConverter::toBrand).orElse(null);
     }
 
     @Override
     public List<Brand> getBrandByCountry(String country) {
+
         List<BrandEntity> brandEntityList = brandRepository.findByCountry(country);
 
         return brandEntityList.stream().map(brandConverter::toBrand).toList();
