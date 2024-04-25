@@ -1,6 +1,7 @@
 package com.scasmar.carregistry.service.impl;
 
 import com.scasmar.carregistry.entity.BrandEntity;
+import com.scasmar.carregistry.model.Brand;
 import com.scasmar.carregistry.model.Car;
 import com.scasmar.carregistry.entity.CarEntity;
 import com.scasmar.carregistry.respository.BrandRepository;
@@ -8,25 +9,33 @@ import com.scasmar.carregistry.respository.CarRepository;
 import com.scasmar.carregistry.service.CarService;
 import com.scasmar.carregistry.service.converters.BrandConverter;
 import com.scasmar.carregistry.service.converters.CarConverter;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@RequiredArgsConstructor
 public class CarServiceImpl implements CarService {
-    @Autowired
-    private CarRepository carRepository;
-    @Autowired
-    private CarConverter carConverter;
-    @Autowired
-    private BrandRepository brandRepository;
-    @Autowired
-    private BrandConverter brandConverter;
+
+    private final CarRepository carRepository;
+    private final CarConverter carConverter;
+    private final BrandRepository brandRepository;
+    private final BrandConverter brandConverter;
+    private final String[] HEADERS = {"brand", "model", "millage", "price", "year", "description", "colour", "fuelType", "numDoor"};
 
     @Override
     @Async
@@ -91,5 +100,61 @@ public class CarServiceImpl implements CarService {
     @Override
     public void deleteCar(int id) {
         carRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Car> addCarsCSV(MultipartFile file) {
+        List<Car> carList = new ArrayList<>();
+
+        try(BufferedReader fileReader = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"))){
+            CSVParser csvParser = new CSVParser(fileReader,
+                    CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
+
+            Iterable<CSVRecord> csvRecordIterable = csvParser.getRecords();
+
+            for (CSVRecord csvRecord : csvRecordIterable){
+                Car car = new Car();
+                Optional<BrandEntity> brandEntityOptional = brandRepository.findByName(csvRecord.get("brand"));
+
+                brandEntityOptional.ifPresent(brandEntity -> car.setBrand(brandConverter.toBrand(brandEntity)));
+
+                car.setModel(csvRecord.get("model"));
+                car.setMillage(Integer.parseInt(csvRecord.get("millage")));
+                car.setPrice(Double.parseDouble(csvRecord.get("price")));
+                car.setYear(Integer.parseInt(csvRecord.get("year")));
+                car.setDescription(csvRecord.get("description"));
+                car.setColour(csvRecord.get("colour"));
+                car.setFuelType(csvRecord.get("fuelType"));
+                car.setNumDoors(Integer.parseInt(csvRecord.get("numDoors")));
+
+                carList.add(car);
+            }
+
+            carRepository.saveAll(carList.stream().map(carConverter::toEntity).toList());
+        }catch (Exception e){
+            throw new RuntimeException("Failed to load cars");
+        }
+
+        return carList;
+    }
+
+    @Override
+    public String carsCSV() {
+        List<Car> carList = carRepository.findAll().stream().map(carConverter::toCar).toList();
+        StringBuilder csvContent = new StringBuilder();
+        csvContent.append(Arrays.toString(HEADERS)).append("\n");
+        for (Car car : carList){
+            csvContent.append(car.getId()).append(",")
+                    .append(car.getBrand()).append(",")
+                    .append(car.getModel()).append(",")
+                    .append(car.getMillage()).append(",")
+                    .append(car.getYear()).append(",")
+                    .append(car.getDescription()).append(",")
+                    .append(car.getColour()).append(",")
+                    .append(car.getDescription()).append(",")
+                    .append(car.getNumDoors()).append("\n");
+        }
+
+        return csvContent.toString();
     }
 }

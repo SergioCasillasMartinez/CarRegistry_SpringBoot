@@ -27,6 +27,7 @@ public class UserEntity implements UserDetails {
     String email;
     String password;
     String role;
+    String image;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

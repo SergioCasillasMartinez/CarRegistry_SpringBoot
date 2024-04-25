@@ -14,5 +14,4 @@ public class SingUpRequest {
     String surname;
     String email;
     String password;
-
 }

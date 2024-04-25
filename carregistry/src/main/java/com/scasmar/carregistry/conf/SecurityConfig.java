@@ -25,6 +25,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+    private static final String BRAND_ROOT = "/brand/**";
+    private static final String CAR_ROOT = "/car/**";
+    private static final String USER_ROOT = "/user/**";
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserServiceImpl userService;
     private final PasswordEncoder passwordEncoder;
@@ -50,10 +54,10 @@ public class SecurityConfig {
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests( authorize -> authorize
                 .requestMatchers(HttpMethod.POST, "/login", "/signup").permitAll()
-                .requestMatchers(HttpMethod.GET, "/brand/**", "/car/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/brand/**", "/car/**").permitAll()
-                .requestMatchers(HttpMethod.PUT, "/brand/**", "/car/**").permitAll()
-                .requestMatchers(HttpMethod.DELETE, "/brand/**", "/car/**").permitAll()
+                .requestMatchers(HttpMethod.GET, BRAND_ROOT, CAR_ROOT, USER_ROOT).permitAll()
+                .requestMatchers(HttpMethod.POST, BRAND_ROOT, CAR_ROOT, USER_ROOT).permitAll()
+                .requestMatchers(HttpMethod.PUT, BRAND_ROOT, CAR_ROOT, USER_ROOT).permitAll()
+                .requestMatchers(HttpMethod.DELETE, BRAND_ROOT, CAR_ROOT, USER_ROOT).permitAll()
                 .anyRequest().authenticated())
         .authenticationProvider(authenticationProvider()).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
