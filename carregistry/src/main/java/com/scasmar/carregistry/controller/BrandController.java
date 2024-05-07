@@ -6,9 +6,11 @@ import com.scasmar.carregistry.controller.mapper.BrandMapper;
 import com.scasmar.carregistry.model.Brand;
 import com.scasmar.carregistry.service.BrandService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.webjars.NotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,27 +40,39 @@ public class BrandController {
     @GetMapping("/getById/{id}")
     @PreAuthorize("hasAnyRole('CLIENT','VENDOR')")
     public ResponseEntity<BrandResponse> getBrandById(@PathVariable int id){
-        BrandResponse brandResponse = brandMapper.toResponse(brandService.getBrandById(id));
+        try{
+            BrandResponse brandResponse = brandMapper.toResponse(brandService.getBrandById(id));
 
-        return ResponseEntity.ok().body(brandResponse);
+            return ResponseEntity.ok().body(brandResponse);
+        }catch (NotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @GetMapping("/getByCountry/{country}")
     @PreAuthorize("hasAnyRole('CLIENT','VENDOR')")
     public ResponseEntity<List<BrandResponse>> getBrandByCountry(@PathVariable String country){
-        List<Brand> brandList = brandService.getBrandByCountry(country);
-        List<BrandResponse> brandResponseList = new ArrayList<>();
-        brandList.forEach(brand -> brandResponseList.add(brandMapper.toResponse(brand)));
+        try{
+            List<Brand> brandList = brandService.getBrandByCountry(country);
+            List<BrandResponse> brandResponseList = new ArrayList<>();
+            brandList.forEach(brand -> brandResponseList.add(brandMapper.toResponse(brand)));
 
-        return ResponseEntity.ok().body(brandResponseList);
+            return ResponseEntity.ok().body(brandResponseList);
+        }catch (NotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('VENDOR')")
     public ResponseEntity<BrandResponse> addBrand(@RequestBody BrandRequest brandRequest){
-        BrandResponse brandResponse = brandMapper.toResponse(brandService.addBrand(brandMapper.toModel(brandRequest)));
+        try {
+            BrandResponse brandResponse = brandMapper.toResponse(brandService.addBrand(brandMapper.toModel(brandRequest)));
 
-        return ResponseEntity.ok().body(brandResponse);
+            return ResponseEntity.ok().body(brandResponse);
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PostMapping("/addList")
@@ -76,9 +90,13 @@ public class BrandController {
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('VENDOR')")
     public ResponseEntity<BrandService> updateBrand(@PathVariable int id, @RequestBody BrandRequest brandRequest){
-        brandService.updateBrand(id, brandMapper.toModel(brandRequest));
+        try{
+            brandService.updateBrand(id, brandMapper.toModel(brandRequest));
 
-        return ResponseEntity.ok().build();
+            return ResponseEntity.ok().build();
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @DeleteMapping("/delete/{id}")

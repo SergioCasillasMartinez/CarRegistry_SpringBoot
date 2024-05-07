@@ -48,7 +48,7 @@ public class CarController {
             List<Car> carsList = carService.getCarModel(model);
             List<CarResponse> carResponseList = carsList.stream().map(carMapper::toResponse).toList();
 
-            return ResponseEntity.ok(carResponseList);
+            return ResponseEntity.ok().body(carResponseList);
         } catch (NotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -72,7 +72,7 @@ public class CarController {
         try{
             CarResponse carResponse = carMapper.toResponse(carService.addCar(carMapper.toModel(carRequest)));
 
-            return ResponseEntity.ok(carResponse);
+            return ResponseEntity.ok().body(carResponse);
         }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -87,7 +87,7 @@ public class CarController {
             }else if (carCSV.getOriginalFilename().contains(".csv")){
                 carService.addCarsCSV(carCSV);
 
-                return ResponseEntity.ok("File added successfully");
+                return ResponseEntity.ok().body("File added successfully");
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
             }
