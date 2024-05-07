@@ -1,7 +1,6 @@
 package com.scasmar.carregistry.service.impl;
 
 import com.scasmar.carregistry.entity.BrandEntity;
-import com.scasmar.carregistry.model.Brand;
 import com.scasmar.carregistry.model.Car;
 import com.scasmar.carregistry.entity.CarEntity;
 import com.scasmar.carregistry.respository.BrandRepository;
@@ -10,16 +9,15 @@ import com.scasmar.carregistry.service.CarService;
 import com.scasmar.carregistry.service.converters.BrandConverter;
 import com.scasmar.carregistry.service.converters.CarConverter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,7 +67,7 @@ public class CarServiceImpl implements CarService {
     @Override
     @Async
     public CompletableFuture<List<Car>> addCarList(List<Car> carList){
-        List<CarEntity> carEntityList = new ArrayList<>();//carList.stream().map(carConverter::toEntity).toList();
+        List<CarEntity> carEntityList = new ArrayList<>();
         carList.forEach(car ->{
             Optional<BrandEntity> brandEntity = brandRepository.findByName(car.getBrand().getName());
             if(brandEntity.isPresent()){
@@ -125,17 +123,16 @@ public class CarServiceImpl implements CarService {
                 car.setDescription(csvRecord.get("description"));
                 car.setColour(csvRecord.get("colour"));
                 car.setFuelType(csvRecord.get("fuelType"));
-                car.setNumDoors(Integer.parseInt(csvRecord.get("numDoors")));
 
                 carList.add(car);
             }
 
             carRepository.saveAll(carList.stream().map(carConverter::toEntity).toList());
-        }catch (Exception e){
-            throw new RuntimeException("Failed to load cars");
-        }
 
-        return carList;
+            return carList;
+        }catch (IOException | NumberFormatException e){
+            throw new RuntimeException("Failed to read the CSV file", e);
+        }
     }
 
     @Override

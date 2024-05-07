@@ -6,20 +6,18 @@ import com.scasmar.carregistry.controller.mapper.CarMapper;
 import com.scasmar.carregistry.model.Car;
 import com.scasmar.carregistry.service.CarService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.webjars.NotFoundException;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,24 +28,30 @@ public class CarController {
 
     @GetMapping("/findAll")
     @PreAuthorize("hasAnyRole('CLIENT','VENDOR')")
-    public CompletableFuture<?> getAllCars(){
+    public CompletableFuture<ResponseEntity<List<CarResponse>>> getAllCars(){
         try{
             CompletableFuture<List<Car>> carsList = carService.getAllCars();
             List<CarResponse> carResponseList = carsList.get().stream().map(carMapper::toResponse).toList();
 
             return CompletableFuture.completedFuture(ResponseEntity.ok().body(carResponseList));
-        } catch (Exception e) {
+        } catch (NotFoundException e) {
             return CompletableFuture.completedFuture(ResponseEntity.notFound().build());
+        } catch (InterruptedException | ExecutionException e){
+            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
         }
     }
 
     @GetMapping("/getModel/{model}")
     @PreAuthorize("hasAnyRole('CLIENT','VENDOR')")
-    public ResponseEntity<?> getCarPrice(@PathVariable String model){
-        List<Car> carsList = carService.getCarModel(model);
-        List<CarResponse> carResponseList = carsList.stream().map(carMapper::toResponse).toList();
+    public ResponseEntity<List<CarResponse>> getCarPrice(@PathVariable String model){
+        try{
+            List<Car> carsList = carService.getCarModel(model);
+            List<CarResponse> carResponseList = carsList.stream().map(carMapper::toResponse).toList();
 
-        return ResponseEntity.ok().body(carResponseList);
+            return ResponseEntity.ok(carResponseList);
+        } catch (NotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
 
     @GetMapping("/getCSV")
@@ -64,17 +68,21 @@ public class CarController {
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('VENDOR')")
-    public ResponseEntity<?> addCar(@RequestBody CarRequest carRequest){
-        CarResponse carResponse = carMapper.toResponse(carService.addCar(carMapper.toModel(carRequest)));
+    public ResponseEntity<CarResponse> addCar(@RequestBody CarRequest carRequest){
+        try{
+            CarResponse carResponse = carMapper.toResponse(carService.addCar(carMapper.toModel(carRequest)));
 
-        return ResponseEntity.ok().body(carResponse);
+            return ResponseEntity.ok(carResponse);
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PostMapping(value = "/addCSV", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('VENDOR')")
-    public ResponseEntity<?> addCsv(@RequestParam(value = "carCSV") MultipartFile carCSV){
+    public ResponseEntity<String> addCsv(@RequestParam(value = "carCSV") MultipartFile carCSV){
         try{
-            if (carCSV.isEmpty()){
+            if (carCSV.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("File is empty");
             }else if (carCSV.getOriginalFilename().contains(".csv")){
                 carService.addCarsCSV(carCSV);
@@ -90,27 +98,34 @@ public class CarController {
 
     @PostMapping("/addList")
     @PreAuthorize("hasRole('VENDOR')")
-    public CompletableFuture<?> addCarList(@RequestBody List<CarRequest> carRequestList){
+    public CompletableFuture<ResponseEntity<?>> addCarList(@RequestBody List<CarRequest> carRequestList){
         try{
             List<Car> carList = carRequestList.stream().map(carMapper::toModel).toList();
 
+
             return carService.addCarList(carList).thenApply(ResponseEntity::ok);
         }catch (Exception e){
-            return CompletableFuture.completedFuture(ResponseEntity.ok().body(e));
+            return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
         }
     }
 
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('VENDOR')")
-    public ResponseEntity<?> updateCar(@PathVariable int id, @RequestBody CarRequest carRequest){
-        carService.updateCar(id, carMapper.toModel(carRequest));
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> updateCar(@PathVariable int id, @RequestBody CarRequest carRequest){
+        try{
+            carService.updateCar(id, carMapper.toModel(carRequest));
+
+            return ResponseEntity.ok().build();
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('VENDOR')")
-    public ResponseEntity<?> deleteCar(@PathVariable int id){
+    public ResponseEntity<String> deleteCar(@PathVariable int id){
         carService.deleteCar(id);
+
         return ResponseEntity.ok().body("Deleted Car with id: " + id);
     }
 
